@@ -14,7 +14,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var billField: UITextField!
     @IBOutlet weak var tipControl: UISegmentedControl!
     @IBOutlet weak var faceImage: UIImageView!
-    var tipPercentages = [0.15, 0.18, 0.2]
+    
+    var defaults = NSUserDefaults.standardUserDefaults()
+    var tipPercentages = [15, 18, 20]
     var faces = [
         UIImage(named: "really.png"),
         UIImage(named: "happy.jpg"),
@@ -24,8 +26,11 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        tipLabel.text = "$0.00"
-        totalLabel.text = "$0.00"
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        loadPresets()
     }
 
     override func didReceiveMemoryWarning() {
@@ -33,10 +38,24 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
         tipControl.selectedSegmentIndex = 2;
     }
+    
+    func loadPresets() {
+        if(defaults.boolForKey("custom_presets")) {
+            tipPercentages = [
+                defaults.integerForKey("option1"),
+                defaults.integerForKey("option2"),
+                defaults.integerForKey("option3")
+            ]
+            
+            tipControl.setTitle("\(tipPercentages[0])%", forSegmentAtIndex: 0)
+            tipControl.setTitle("\(tipPercentages[1])%", forSegmentAtIndex: 1)
+            tipControl.setTitle("\(tipPercentages[2])%", forSegmentAtIndex: 2)
+        }
+    }
 
     @IBAction func onEditingChanged(sender: AnyObject) {
         var index = tipControl.selectedSegmentIndex
-        var tipPercentage = tipPercentages[index]
+        var tipPercentage = Double(tipPercentages[index]) / 100
         var billAmount = NSString(string: billField.text).doubleValue
         var tip = billAmount * tipPercentage
         var total = billAmount + tip
